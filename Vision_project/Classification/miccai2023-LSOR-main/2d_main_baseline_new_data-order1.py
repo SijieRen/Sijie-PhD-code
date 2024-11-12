@@ -376,7 +376,7 @@ def train_baseline_LSOR(args, config,
             'optimizer': optimizer_lsor.state_dict(), 'scheduler': scheduler_lsor.state_dict(), \
             'model': model_lsor.state_dict()}
     print(optimizer_lsor.param_groups[0]['lr'])
-    save_checkpoint(state, is_best, "miccai-2023-lror/epoch{%3d}}.pth.tar".format(epoch))
+    save_checkpoint(state, is_best, "miccai-2023-lror/epoch{%s}}.pth.tar"%(str(epoch).zfill(3)))
 
     return monitor_metric_best
 
