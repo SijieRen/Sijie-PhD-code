@@ -420,7 +420,7 @@ def train_baseline_CLS(args, config,optimizer_lsor,
         # z_q1, z_q2 = zs[1][0], zs[1][1]
         # k1, k2 = zs[2][0], zs[2][1]
         # sim1, sim2 = zs[3][0], zs[3][1]
-        output_generate_1 = model_cls(zs[0])
+        output_generate_1 = model_cls(zs[0], None)
         # loss
         loss_sum = torch.FloatTensor([0.0]).cuda()
         loss = F.CrossEntropy(F.softmax(output_generate_1, dim=1), target_ppa=target_ppa)
@@ -620,7 +620,7 @@ def main():
             start_time = time.time()
             train_baseline_CLS(args, config,optimizer_lsor,
                                                model_lsor, scheduler_lsor, model_2_generate, 
-                                               optimizer_cls,
+                                               optimizer_M_2_generate,
                                                train_loader,
                                                test_loader_list, epoch)
             # [model], start_epoch = load_checkpoint_by_key(
