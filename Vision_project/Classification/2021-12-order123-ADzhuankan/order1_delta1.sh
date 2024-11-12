@@ -1,0 +1,6 @@
+#!/bin/bash
+for delta1 in $2 $3 $4 $5 $6; do
+    echo "CUDA_VISIBLE_DEVICES=$1 python main_ours_new_data_order1.py --lr 0.00005 --lr_decay 0.1 --lr_controler 60 --epochs 110 --lr2 0.01  --wd 0.0001 --wd2 0.00005 --image_size 256 --batch-size 20 --test-batch-size 20 --optimizer Mixed --save_checkpoint 1 --wcl 0.01 --alpha 0.1 --beta 1 --beta1 0 --gamma 0.5 --delta1 0.001 --lambda2 1 --log-interval 2 --isplus 0 --G_net_type G_net --feature_list 8 24 28 17 10 9 15 33 --sequence 2201-Ours-order1 --final_tanh 0 --seed -1 --is_plot 0 --filename std --RNN_hidden 256 --dp 0.5 --xlsx_name ../review_results/2201_Ours_order1_sensitivity.xls --filename std_all"
+    CUDA_VISIBLE_DEVICES=$1 python main_ours_new_data_order1.py --lr 0.00005 --lr_decay 0.1 --lr_controler 60 --epochs 110 --lr2 0.01  --wd 0.0001 --wd2 0.00005 --image_size 256 --batch-size 20 --test-batch-size 20 --optimizer Mixed --save_checkpoint 1 --wcl 0.01 --alpha 0.1 --beta 1 --beta1 0 --gamma 0.5 --delta1 $delta1 --lambda2 1 --log-interval 2 --isplus 0 --G_net_type G_net --feature_list 8 24 28 17 10 9 15 33 --sequence 2201-Ours-order1 --final_tanh 0 --seed -1 --is_plot 0 --filename std --RNN_hidden 256 --dp 0.5 --xlsx_name ../review_results/2201_Ours_order1_sensitivity.xls --filename std_all
+
+done

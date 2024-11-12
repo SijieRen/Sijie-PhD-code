@@ -1,0 +1,99 @@
+import os
+import SimpleITK as sitk
+import numpy as np
+from PIL import Image
+
+
+window_center = -600
+window_width = 1200
+
+
+def read_nii_file(nii_file_path):
+    sitk_data = sitk.ReadImage(nii_file_path)
+    return sitk.GetArrayFromImage(sitk_data), sitk_data 
+
+
+def prepare_orimage(data_root_path, output_dir):  
+    for type_name in os.listdir(data_root_path):
+        type_name_path = os.path.join(data_root_path, type_name)
+        output_path = os.path.join(output_dir, type_name)
+        os.makedirs(output_path, exist_ok=True)
+        origin_case_name_list = [case_name for case_name in os.listdir(type_name_path) if#中山医院_mask 肿瘤医院_seg
+                                 "_mask.nii.gz" not in case_name] #TODO 对不同数据是否需要修改处理后缀
+        mask_case_name_list = [case_name for case_name in os.listdir(type_name_path) if #for 中山医院
+                                 "_mask.nii.gz" in case_name] #TODO 对不同数据是否需要修改处理后缀
+        save_p = 0
+        for origin_case_name in origin_case_name_list:
+            origin_case_name_path = os.path.join(type_name_path, origin_case_name)
+            # seg_case_name_path = os.path.join(type_name_path, origin_case_name.replace(".nii.gz", "_seg.nii.gz"))#for 肿瘤医院
+            
+            for mask_name in mask_case_name_list:
+                if origin_case_name[:-7] in mask_name: # XXX.nii.gz for origin_case_name
+                    mask_case_name = mask_name
+                    # break
+                    seg_case_name_path = os.path.join(type_name_path, mask_case_name)# for 中山医院 and 肿瘤医院
+                    print("99999999",seg_case_name_path)
+                    mask_image, _ = read_nii_file(seg_case_name_path)  
+                    z_list, y_list, x_list = np.nonzero(mask_image) 
+                    min_h = np.min(y_list)
+                    min_w = np.min(x_list)
+                    max_h = np.max(y_list)
+                    max_w = np.max(x_list)
+                    center_h = int(max_h - (max_h - min_h) / 2)
+                    center_w = int(max_w - (max_w - min_w) / 2)
+
+                    max_width, max_height = 64, 64
+                    width = np.max(x_list) - np.min(x_list)
+                    height = np.max(y_list) - np.min(y_list)
+                    if width > max_width: max_width = width  
+                    if height > max_height: max_height = height  
+
+                    origin_image, _ = read_nii_file(origin_case_name_path) 
+                    max_area_depth = [0, 0]
+
+                    for depth in set(z_list):
+                        mask_single = mask_image[depth, :, :]
+                        area = mask_single[mask_single > 0].sum()
+                        if area > max_area_depth[1]:
+                            max_area_depth[0] = depth
+                            max_area_depth[1] = area
+                    # 原始按照mask区域最大部分提取
+                    # origin_single = origin_image[max_area_depth[0], :, :]
+                    # 增加mask数据 提取
+                    origin_single = np.where(mask_image[max_area_depth[0], :, :] > 0, origin_image[max_area_depth[0], :, :], 1)
+
+                    left_top_h = max(int(center_h - max_height / 2), 0)
+                    left_top_w = max(int(center_w - max_width / 2), 0)
+                    right_bottom_h = min(int(center_h + max_height / 2), mask_single.shape[0])
+                    right_bottom_w = min(int(center_w + max_width / 2), mask_single.shape[1])
+                    crop_origin_img = origin_single[left_top_h:right_bottom_h, left_top_w:right_bottom_w]
+                    # print("111",origin_case_name)
+                    # print("222",origin_case_name.rsplit("_", 2))
+                    origin_prefix_name = origin_case_name[:-7]##中山[:-7]  肿瘤[:-7]
+                    if crop_origin_img.shape != (64,64):
+                        print(origin_prefix_name)
+                    output_image_dir = os.path.join(output_path, origin_prefix_name)
+                    #print("origin_prefix_name",origin_prefix_name)
+                    os.makedirs(output_image_dir, exist_ok=True)
+                    output_save_name = f"{str(depth + 1).zfill(3)}_{str(save_p + 1).zfill(3)}.png" #同一个人如果有多张图片是否在不同depth
+                    min_window = (2*window_center - window_width)/2.0 + 0.5
+                    max_window = (2*window_center + window_width)/2.0 + 0.5
+                    dFactor = 255.0 / (max_window - min_window)
+                    window_single_processing = (crop_origin_img - min_window) * dFactor
+                    window_single_processing[window_single_processing < 0] = 0      
+                    window_single_processing[window_single_processing > 255] = 255
+                    origin_output_image = Image.fromarray(window_single_processing.astype(np.uint8))
+                    origin_output_image_name = os.path.join(output_image_dir, output_save_name)
+                    #print("output_image_dir", output_image_dir)
+                    #print("SAVE SAVE", origin_output_image_name)
+                    origin_output_image.save(origin_output_image_name)
+                    save_p+=1
+                    print("save num:", save_p)
+    return None
+
+
+if __name__ == '__main__':
+    data_root_path = "../../../../data/zhongshan_Lung_data/中山医院/" 
+    output_dir = "../../../../data/Total_Stas_unzip_zhongshan_Lung_data_2D_maskOnly/中山医院/"
+    prepare_orimage(data_root_path, output_dir)
+
