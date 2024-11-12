@@ -226,14 +226,15 @@ def evaluate(config, model, dataloader, phase='val', set='val', save_res=True, i
 
 def train_baseline_LSOR(args, config,
                    model_lsor,optimizer_lsor,scheduler_lsor,
-                   train_loader, test_loader_list, epoch):
+                   train_loader, test_loader_list, epoch, 
+                    monitor_metric_best = 100
+                   ):
     global_iter = 0
     # model_1.train()
     # model_2_generate.train()
     model_lsor.train()
     
     train_loss_M2_generate = AverageMeter()
-    
     image_sequence = 0
     correct_generate = 0
     for batch_idx, (data_1, data_2, ppa_t1, target_ppa, feature_1, feature_2, grad_1, grad_2) in enumerate(train_loader):
@@ -338,44 +339,46 @@ def train_baseline_LSOR(args, config,
                     % (epoch, batch_idx, loss.item(), loss_recon.item(), loss_recon_zq.item(), loss_commit.item(), loss_som.item(), loss_dir.item()))
             print('Num. of k:', torch.unique(k1).shape[0], torch.unique(k2).shape[0])
 
-        # save train result
-        num_iter = global_iter - global_iter0
-        for key in loss_all_dict.keys():
-            loss_all_dict[key] /= num_iter
-        if 'k1' not in loss_all_dict:
-            loss_all_dict['k1'] = 0
-        if 'k2' not in loss_all_dict:
-            loss_all_dict['k2'] = 0
+    # save train result
+    num_iter = global_iter - global_iter0
+    for key in loss_all_dict.keys():
+        loss_all_dict[key] /= num_iter
+    if 'k1' not in loss_all_dict:
+        loss_all_dict['k1'] = 0
+    if 'k2' not in loss_all_dict:
+        loss_all_dict['k2'] = 0
 
-        # save_result_stat(loss_all_dict, config, info='epoch[%2d]'%(epoch))
-        print(loss_all_dict)
+    # save_result_stat(loss_all_dict, config, info='epoch[%2d]'%(epoch))
+    print(loss_all_dict)
 
         # validation
         # pdb.set_trace()
-        for ss in range(len(test_loader_list)):
+    for ss in range(len(test_loader_list)):
 
-            stat = evaluate(config, model_lsor, test_loader_list[ss], phase='val', set='val', save_res=False, epoch=epoch)
-            if ss ==0:
-                monitor_metric = stat['recon']
-            else:
-                monitor_metric += stat['recon']
+        stat = evaluate(config, model_lsor, test_loader_list[ss], phase='val', set='val', save_res=False, epoch=epoch)
+        if ss ==0:
+            monitor_metric = stat['recon']
+        else:
+            monitor_metric += stat['recon']
 
-        # monitor_metric = stat['all']
-        
-        scheduler_lsor.step(monitor_metric/5)
-        # save_result_stat(stat, config, info='val')
-        print(stat)
+    # monitor_metric = stat['all']
+    
+    scheduler_lsor.step(monitor_metric/5)
+    # save_result_stat(stat, config, info='val')
+    print("stat", stat)
 
-        # save ckp
-        is_best = False
-        if monitor_metric <= monitor_metric_best:
-            is_best = True
-            monitor_metric_best = monitor_metric if is_best == True else monitor_metric_best
-        state = {'epoch': epoch, 'monitor_metric': monitor_metric, 'stat': stat, \
-                'optimizer': optimizer_lsor.state_dict(), 'scheduler': scheduler_lsor.state_dict(), \
-                'model': model_lsor.state_dict()}
-        print(optimizer_lsor.param_groups[0]['lr'])
-        save_checkpoint(state, is_best, "./miccai-2023-lror")
+    # save ckp
+    is_best = False
+    if monitor_metric <= monitor_metric_best:
+        is_best = True
+        monitor_metric_best = monitor_metric if is_best == True else monitor_metric_best
+    state = {'epoch': epoch, 'monitor_metric': monitor_metric, 'stat': stat, \
+            'optimizer': optimizer_lsor.state_dict(), 'scheduler': scheduler_lsor.state_dict(), \
+            'model': model_lsor.state_dict()}
+    print(optimizer_lsor.param_groups[0]['lr'])
+    save_checkpoint(state, is_best, "./miccai-2023-lror")
+
+    return monitor_metric_best
 
 
 #train_baseline_CLS(args, config,optimizer_lsor,
@@ -610,16 +613,16 @@ def main():
             pass
         # model_lsor = load_pretrained_model_lsor(model_lsor), "./miccai-2023-lror/model_best.pth.tar"
         model_lsor = load_pytorch_model(model_lsor, "./miccai-2023-lror/model_best.pth.tar")
-        
+        monitor_metric_best = 100
         # train the classifier
         for epoch in range(1, args.epochs + 1):
             args.logger.info('LROR Classifier')
             start_time = time.time()
-            train_results = train_baseline_CLS(args, config,optimizer_lsor,
+            monitor_metric_best = train_baseline_CLS(args, config,optimizer_lsor,
                                                model_lsor, scheduler_lsor, model_2_generate, 
                                                optimizer_cls,
                                                train_loader,
-                                               test_loader_list, epoch)
+                                               test_loader_list, epoch,monitor_metric_best = monitor_metric_best)
             # [model], start_epoch = load_checkpoint_by_key(
             #     [model], config['ckpt_path'], ['model'], config['device'], config['ckpt_name'])
             # zheli jixue xie
