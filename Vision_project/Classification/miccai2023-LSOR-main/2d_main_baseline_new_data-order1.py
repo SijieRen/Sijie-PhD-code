@@ -171,7 +171,7 @@ def evaluate(config, model, dataloader, phase='val', set='val', save_res=True, i
             k2_list.append(k2.detach().cpu().numpy())
 
         for key in loss_all_dict.keys():
-            loss_all_dict[key] /= (iter + 1)
+            loss_all_dict[key] /= (batch_idx + 1)
 
         if phase == 'test' and save_res:
             input1_list = np.concatenate(input1_list, axis=0)
