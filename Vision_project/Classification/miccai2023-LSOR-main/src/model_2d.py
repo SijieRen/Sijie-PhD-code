@@ -423,7 +423,7 @@ class SOMPairVisit(SOM):
         z_e1, z_e2 = z_e[:bs], z_e[bs:]
 
         z_e_diff = (z_e2 - z_e1) / interval.unsqueeze(1)
-        print("z_e size: ", z_e.size())
+        # print("z_e size: ", z_e.size())
         recon_ze = self.decoder(z_e, feat_list)
         recon_ze1, recon_ze2 = recon_ze[:bs], recon_ze[bs:]
         

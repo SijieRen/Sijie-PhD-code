@@ -333,7 +333,7 @@ def train_baseline_LSOR(args, config,
         print(np.abs(emb_new-emb_old).mean(), np.abs(enc_new-enc_old).mean(), np.abs(dec_new-dec_old).mean())
         # pdb.set_trace()
 
-        if global_iter % 1 == 0:
+        if global_iter % 100 == 0:
             # pdb.set_trace()
             print('Epoch[%3d], batch_idx[%3d]: loss=[%.4f], recon=[%.4f], recon_zq=[%.4f], commit=[%.4f], som=[%.4f], dir=[%.4f]' \
                     % (epoch, batch_idx, loss.item(), loss_recon.item(), loss_recon_zq.item(), loss_commit.item(), loss_som.item(), loss_dir.item()))
@@ -376,7 +376,7 @@ def train_baseline_LSOR(args, config,
             'optimizer': optimizer_lsor.state_dict(), 'scheduler': scheduler_lsor.state_dict(), \
             'model': model_lsor.state_dict()}
     print(optimizer_lsor.param_groups[0]['lr'])
-    save_checkpoint(state, is_best, "./miccai-2023-lror")
+    save_checkpoint(state, is_best, "miccai-2023-lror/epoch{%3d}}.pth.tar".format(epoch))
 
     return monitor_metric_best
 
