@@ -384,7 +384,11 @@ def train_baseline_LSOR(args, config,
 #train_baseline_CLS(args, config,optimizer_lsor,
                     # model_lsor, scheduler_lsor, model_cls, 
                     # optimizer_cls,epoch)
-
+# train_baseline_CLS(args, config,optimizer_lsor,
+#                                                model_lsor, scheduler_lsor, model_2_generate, 
+#                                                optimizer_M_2_generate,
+#                                                train_loader,
+#                                                test_loader_list, epoch)
 def train_baseline_CLS(args, config,optimizer_lsor,
                        model_lsor, scheduler_lsor, model_cls,
                        optimizer_cls,train_loader,
@@ -478,7 +482,7 @@ def evaluate_baseline_CLS(args,
             interval = grad_2 - grad_1
             recons, zs = model_lsor.forward_pair_z(data_1, data_2, interval)
 
-            output_generate_1 = model_cls(zs[0])
+            output_generate_1 = model_cls(torch.cat([zs[0], zs[1], zs[2]], 1), None)
             # loss
             # loss_sum = torch.FloatTensor([0.0]).cuda()
             # loss = F.CrossEntropy(F.softmax(output_generate_1, dim=1), target_ppa=target_ppa)
