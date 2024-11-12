@@ -334,8 +334,8 @@ def train_baseline_LSOR(args, config,
 
         if global_iter % 1 == 0:
             # pdb.set_trace()
-            print('Epoch[%3d], iter[%3d]: loss=[%.4f], recon=[%.4f], recon_zq=[%.4f], commit=[%.4f], som=[%.4f], dir=[%.4f]' \
-                    % (epoch, iter, loss.item(), loss_recon.item(), loss_recon_zq.item(), loss_commit.item(), loss_som.item(), loss_dir.item()))
+            print('Epoch[%3d], batch_idx[%3d]: loss=[%.4f], recon=[%.4f], recon_zq=[%.4f], commit=[%.4f], som=[%.4f], dir=[%.4f]' \
+                    % (epoch, batch_idx, loss.item(), loss_recon.item(), loss_recon_zq.item(), loss_commit.item(), loss_som.item(), loss_dir.item()))
             print('Num. of k:', torch.unique(k1).shape[0], torch.unique(k2).shape[0])
 
         # save train result
