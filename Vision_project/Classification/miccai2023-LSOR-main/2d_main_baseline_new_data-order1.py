@@ -82,9 +82,9 @@ def evaluate(config, model, dataloader, phase='val', set='val', save_res=True, i
             # run LSOR model
             image1 = data_1
             image2 = data_2
-            if len(image1.shape) == 4:
-                image1 = image1.unsqueeze(1)
-                image2 = image2.unsqueeze(1)
+            # if len(image1.shape) == 4:
+            #     image1 = image1.unsqueeze(1)
+            #     image2 = image2.unsqueeze(1)
             # label = sample['label'].to(config['device'], dtype=torch.float)
             # interval = sample['interval'].to(config['device'], dtype=torch.float)
             interval = grad_2 - grad_1
