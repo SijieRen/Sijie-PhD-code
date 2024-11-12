@@ -41,7 +41,7 @@ def evaluate(config, model, dataloader, phase='val', set='val', save_res=True, i
     #     else:
     #         raise ValueError('Undefined loader')
 
-    res_path = os.path.join(config['ckpt_path'], 'result_'+set)
+    res_path = os.path.join("./lror_res", 'result_'+set)
     if not os.path.exists(res_path):
         os.makedirs(res_path)
     path = os.path.join(res_path, 'results_all'+info+'.h5')
