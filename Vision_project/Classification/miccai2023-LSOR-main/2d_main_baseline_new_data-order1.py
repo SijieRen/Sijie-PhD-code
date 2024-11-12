@@ -330,7 +330,7 @@ def train_baseline_LSOR(args, config,
         emb_new = model_lsor.embeddings.detach().cpu().numpy()
         enc_new = torch.cat([param.view(-1) for param in model_lsor.encoder.parameters()]).detach().cpu().numpy()
         dec_new = torch.cat([param.view(-1) for param in model_lsor.decoder.parameters()]).detach().cpu().numpy()
-        print(np.abs(emb_new-emb_old).mean(), np.abs(enc_new-enc_old).mean(), np.abs(dec_new-dec_old).mean())
+        # print(np.abs(emb_new-emb_old).mean(), np.abs(enc_new-enc_old).mean(), np.abs(dec_new-dec_old).mean())
         # pdb.set_trace()
 
         if global_iter % 100 == 0:
@@ -376,9 +376,9 @@ def train_baseline_LSOR(args, config,
             'optimizer': optimizer_lsor.state_dict(), 'scheduler': scheduler_lsor.state_dict(), \
             'model': model_lsor.state_dict()}
     print(optimizer_lsor.param_groups[0]['lr'])
-    save_checkpoint(state, is_best, "miccai-2023-lror/epoch{%s}}.pth.tar"%(str(epoch).zfill(3)))
+    # save_checkpoint(state, is_best, "miccai-2023-lror/epoch{%s}}.pth.tar"%(str(epoch).zfill(3)))
 
-    return monitor_metric_best
+    # return monitor_metric_best
 
 
 #train_baseline_CLS(args, config,optimizer_lsor,
@@ -612,17 +612,17 @@ def main():
                                 train_loader, test_loader_list, epoch)
             pass
         # model_lsor = load_pretrained_model_lsor(model_lsor), "./miccai-2023-lror/model_best.pth.tar"
-        model_lsor = load_pytorch_model(model_lsor, "./miccai-2023-lror/model_best.pth.tar")
+        # model_lsor = load_pytorch_model(model_lsor, "./miccai-2023-lror/model_best.pth.tar")
         monitor_metric_best = 100
         # train the classifier
         for epoch in range(1, args.epochs + 1):
             args.logger.info('LROR Classifier')
             start_time = time.time()
-            monitor_metric_best = train_baseline_CLS(args, config,optimizer_lsor,
+            train_baseline_CLS(args, config,optimizer_lsor,
                                                model_lsor, scheduler_lsor, model_2_generate, 
                                                optimizer_cls,
                                                train_loader,
-                                               test_loader_list, epoch,monitor_metric_best = monitor_metric_best)
+                                               test_loader_list, epoch)
             # [model], start_epoch = load_checkpoint_by_key(
             #     [model], config['ckpt_path'], ['model'], config['device'], config['ckpt_name'])
             # zheli jixue xie
@@ -644,7 +644,7 @@ def main():
                 args,
                 model_1,
                 model_2_generate,
-                train_results,
+                # train_results,
                 val_results_list,
                 test_results_list,
                 full_results,
