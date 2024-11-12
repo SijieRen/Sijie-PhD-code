@@ -67,7 +67,7 @@ def evaluate(config, model, dataloader, phase='val', set='val', save_res=True, i
     sim2_list = []
     subj_id_list = []
     case_order_list = []
-
+    global_iter = 0
     with torch.no_grad():
         recon_emb = model.recon_embeddings()
 
